@@ -1,62 +1,65 @@
 <x-guest-layout>
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8 py-10">
-        
-        <div class="max-w-md w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-8 sm:p-10">
-            
-            <div class="flex flex-col items-center mb-8">
-                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-600 text-white mb-4 shadow-sm">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Rejoindre l'aventure</h2>
-                <p class="text-sm text-gray-500 mt-2 font-medium">Créez votre profil EasyColoc en 30 secondes.</p>
+    <div class="w-full max-w-md bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-white/30 p-10 transition-transform duration-300 hover:-translate-y-1">
+
+        {{-- Logo & Title --}}
+        <div class="flex flex-col items-center mb-8">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg mb-4">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Créer un compte</h2>
+            <p class="text-sm text-gray-500 mt-1">Rejoignez EasyColoc en 30 secondes.</p>
+        </div>
+
+        <form method="POST" action="{{ route('register') }}" class="space-y-5">
+            @csrf
+
+            {{-- Name --}}
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Votre prénom</label>
+                <input id="name" name="name" type="text"
+                       value="{{ old('name') }}" required autofocus
+                       class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white/80 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                <x-input-error :messages="$errors->get('name')" class="mt-1 text-sm text-red-500" />
             </div>
 
-            <form method="POST" action="{{ route('register') }}" class="space-y-6">
-                @csrf
-
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700">Votre prénom</label>
-                    <div class="mt-2">
-                        <input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus class="appearance-none block w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900 text-sm">
-                        <x-input-error :messages="$errors->get('name')" class="mt-2 text-red-500 text-sm" />
-                    </div>
-                </div>
-
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700">Adresse Email</label>
-                    <div class="mt-2">
-                        <input id="email" name="email" type="email" value="{{ old('email') }}" required class="appearance-none block w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900 text-sm">
-                        <x-input-error :messages="$errors->get('email')" class="mt-2 text-red-500 text-sm" />
-                    </div>
-                </div>
-
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
-                    <div class="mt-2">
-                        <input id="password" name="password" type="password" required class="appearance-none block w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900 text-sm">
-                        <x-input-error :messages="$errors->get('password')" class="mt-2 text-red-500 text-sm" />
-                    </div>
-                </div>
-
-                <div>
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirmer le mot de passe</label>
-                    <div class="mt-2">
-                        <input id="password_confirmation" name="password_confirmation" type="password" required class="appearance-none block w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900 text-sm">
-                    </div>
-                </div>
-
-                <div class="pt-2">
-                    <button type="submit" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                        Créer mon compte
-                    </button>
-                </div>
-            </form>
-
-            <div class="mt-8 text-center text-sm">
-                <p class="text-gray-600">Déjà inscrit ? 
-                    <a href="{{ route('login') }}" class="font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">Connectez-vous</a>
-                </p>
+            {{-- Email --}}
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Adresse Email</label>
+                <input id="email" name="email" type="email"
+                       value="{{ old('email') }}" required
+                       class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white/80 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                <x-input-error :messages="$errors->get('email')" class="mt-1 text-sm text-red-500" />
             </div>
+
+            {{-- Password --}}
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+                <input id="password" name="password" type="password"
+                       required
+                       class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white/80 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                <x-input-error :messages="$errors->get('password')" class="mt-1 text-sm text-red-500" />
+            </div>
+
+            {{-- Confirm Password --}}
+            <div>
+                <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmer le mot de passe</label>
+                <input id="password_confirmation" name="password_confirmation" type="password"
+                       required
+                       class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white/80 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+            </div>
+
+            {{-- Submit --}}
+            <button type="submit"
+                class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                Créer mon compte
+            </button>
+        </form>
+
+        <div class="mt-7 text-center text-sm text-gray-500">
+            Déjà inscrit ?
+            <a href="{{ route('login') }}" class="font-semibold text-indigo-600 hover:text-indigo-500 transition">Connectez-vous</a>
         </div>
     </div>
 </x-guest-layout>
