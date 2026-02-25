@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('colocations', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('code')->unique();
-            $table->string('status')->default('pending');
+            $table->string('status')->default('active');
             $table->timestamps();
         });
     }
