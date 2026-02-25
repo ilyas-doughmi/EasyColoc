@@ -7,7 +7,7 @@ use App\Models\User;
 
 class Colocation extends Model
 {
-    protected $fillable = ['name', 'code', 'status'];
+    protected $fillable = ['name','status'];
 
     public function User()
     {
