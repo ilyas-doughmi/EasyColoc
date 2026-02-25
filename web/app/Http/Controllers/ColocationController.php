@@ -12,7 +12,7 @@ class ColocationController extends Controller
     public function index()
     {
         $user = auth()->user();
-       $colocations= $user->colocations;
+        $colocations= $user->colocations;
         return view('colocations.index',['colocations'=>$colocations]);
     }
 
@@ -28,6 +28,12 @@ class ColocationController extends Controller
         ]);
 
         $user = Auth::user();
+
+        $hasActiveColocation = $user->colocations()->wherePivot('status', 'active')->exists();
+
+        if($hasActiveColocation){
+            return back()->withErrors(['name'=>'already have collocation']);
+        }
 
         $colocation = Colocation::create($validated);
         
