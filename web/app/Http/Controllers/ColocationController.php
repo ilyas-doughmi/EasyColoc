@@ -11,7 +11,9 @@ class ColocationController extends Controller
 {
     public function index()
     {
-        return view('colocations.index');
+        $user = auth()->user();
+       $colocations= $user->colocations;
+        return view('colocations.index',['colocations'=>$colocations]);
     }
 
     public function create()
@@ -25,7 +27,7 @@ class ColocationController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
-        $user = Auth()->user();
+        $user = Auth::user();
 
         $colocation = Colocation::create($validated);
         
