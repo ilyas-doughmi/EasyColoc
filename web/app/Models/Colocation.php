@@ -12,7 +12,7 @@ class Colocation extends Model
 
     public function User()
     {
-       return $this->belongsToMany(User::class);
+       return $this->belongsToMany(User::class)->withPivot('role','status','joined_at');
     }
 
     public function Invitation()
