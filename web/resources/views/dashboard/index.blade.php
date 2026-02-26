@@ -237,7 +237,7 @@
                         @foreach($col->User as $member)
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                                <img src="" alt="">
+                                <img src="https://ui-avatars.com/api/?name={{ $member->name }}&rounded=true&background=123456&color=ffffff" alt="">
                             </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-xs font-semibold text-white truncate">{{ $member->name }}</p>
