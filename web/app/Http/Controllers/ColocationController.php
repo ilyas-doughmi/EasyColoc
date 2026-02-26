@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\ColocationStoreRequest;
 use App\Models\Colocation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -12,8 +12,8 @@ class ColocationController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $colocations= $user->colocations;
-        return view('colocations.index',['colocations'=>$colocations]);
+        $col= $user->colocations;
+        return view('colocations.index',['col'=>$col]);
     }
 
     public function create()
@@ -21,11 +21,9 @@ class ColocationController extends Controller
         return view('colocations.create');
     }
 
-    public function store(Request $request)
+    public function store(ColocationStoreRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         $user = Auth::user();
 
