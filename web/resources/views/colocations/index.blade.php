@@ -85,7 +85,7 @@
                 {{-- Footer --}}
                 <div class="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
                     @if($coloc->status !== 'cancelled')
-                    <a href="#" class="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-white hover:bg-indigo-600 px-3 py-1.5 rounded-lg transition">
+                    <a href="{{ route('colocations.show', $coloc) }}" class="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-white hover:bg-indigo-600 px-3 py-1.5 rounded-lg transition">
                         Ouvrir
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
