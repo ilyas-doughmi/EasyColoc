@@ -11,14 +11,19 @@ class ColocationController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $col= $user->colocations;
-        return view('colocations.index',['col'=>$col]);
+        return view('colocations.index',['colocations'=>$col]);
     }
 
     public function create()
     {
         return view('colocations.create');
+    }
+
+    public function show(Colocation $colocation)
+    {
+        return view('colocations.show', ['colocation' => $colocation]);
     }
 
     public function store(ColocationStoreRequest $request)
