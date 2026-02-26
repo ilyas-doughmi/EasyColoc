@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ColocationController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InvitationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -20,6 +21,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/colocations/create', [ColocationController::class, 'create'])->name('colocations.create');
     Route::get('/colocations/{colocation}', [ColocationController::class, 'show'])->name('colocations.show');
     Route::post('/colocations', [ColocationController::class, 'store'])->name('colocations.store');
+    Route::post('/invitations', [InvitationController::class, 'sendInvitation'])->name('invitations.send');
 });
 
 require __DIR__.'/auth.php';
