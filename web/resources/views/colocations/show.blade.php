@@ -290,7 +290,7 @@
     </div>
 
     {{-- ===== INVITATION MODAL ===== --}}
-    <div id="inviteModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div id="inviteModal" class="{{ $errors->any() || session('error') ? '' : 'hidden' }} fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
 
             {{-- Header --}}
@@ -313,11 +313,12 @@
                 </button>
             </div>
 
-            {{-- Body --}}
-            <div class="px-6 py-5 space-y-5">
+            {{-- Body (real POST form) --}}
+            <form method="POST" action="{{ route('invitations.send') }}">
+                @csrf
+                <input type="hidden" name="colocation_id" value="{{ $colocation->id }}">
 
-                {{-- Email input --}}
-                <div>
+                <div class="px-6 py-5">
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">Adresse email</label>
                     <div class="flex gap-2">
                         <div class="relative flex-1">
@@ -327,27 +328,33 @@
                                 </svg>
                             </div>
                             <input
-                                id="inviteEmail"
+                                name="email"
                                 type="email"
+                                value="{{ old('email') }}"
                                 placeholder="ami@exemple.com"
+                                required
                                 class="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition"
                             >
                         </div>
-                        <button onclick="sendInvite()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition shadow-sm shadow-indigo-200 whitespace-nowrap">
+                        <button type="submit" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition shadow-sm shadow-indigo-200 whitespace-nowrap">
                             Envoyer
                         </button>
                     </div>
-                    <p id="inviteMsg" class="hidden mt-2 text-xs font-medium text-emerald-600">✓ Invitation envoyée !</p>
-                    <p id="inviteError" class="hidden mt-2 text-xs font-medium text-rose-500">Veuillez entrer un email valide.</p>
+                    @error('email')
+                        <p class="mt-2 text-xs font-medium text-rose-500">{{ $message }}</p>
+                    @enderror
+                    @if(session('error'))
+                        <p class="mt-2 text-xs font-medium text-rose-500">{{ session('error') }}</p>
+                    @endif
                 </div>
-            </div>
 
-            {{-- Footer --}}
-            <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end">
-                <button onclick="closeInviteModal()" class="px-4 py-2 border border-gray-200 text-sm font-semibold text-gray-700 rounded-xl hover:bg-white transition">
-                    Fermer
-                </button>
-            </div>
+                {{-- Footer --}}
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end">
+                    <button type="button" onclick="closeInviteModal()" class="px-4 py-2 border border-gray-200 text-sm font-semibold text-gray-700 rounded-xl hover:bg-white transition">
+                        Fermer
+                    </button>
+                </div>
+            </form>
 
         </div>
     </div>
@@ -402,9 +409,6 @@
         // Invite modal
         function openInviteModal() {
             document.getElementById('inviteModal').classList.remove('hidden');
-            document.getElementById('inviteMsg').classList.add('hidden');
-            document.getElementById('inviteError').classList.add('hidden');
-            document.getElementById('inviteEmail').value = '';
         }
         function closeInviteModal() {
             document.getElementById('inviteModal').classList.add('hidden');
@@ -412,33 +416,16 @@
         document.getElementById('inviteModal').addEventListener('click', function (e) {
             if (e.target === this) closeInviteModal();
         });
-
-        function sendInvite() {
-            const email = document.getElementById('inviteEmail').value.trim();
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            document.getElementById('inviteMsg').classList.add('hidden');
-            document.getElementById('inviteError').classList.add('hidden');
-            if (!emailRegex.test(email)) {
-                document.getElementById('inviteError').classList.remove('hidden');
-                return;
-            }
-            // Simulate send (frontend only)
-            document.getElementById('inviteEmail').value = '';
-            document.getElementById('inviteMsg').classList.remove('hidden');
-        }
-
-        function copyLink() {
-            const link = document.getElementById('inviteLink').innerText.trim();
-            navigator.clipboard.writeText(link).then(() => {
-                const btn = document.getElementById('copyBtn');
-                btn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Copié !';
-                btn.classList.add('text-emerald-600', 'border-emerald-300', 'bg-emerald-50');
-                setTimeout(() => {
-                    btn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg> Copier';
-                    btn.classList.remove('text-emerald-600', 'border-emerald-300', 'bg-emerald-50');
-                }, 2000);
-            });
-        }
     </script>
+
+    @if(session('success'))
+    <div id="successToast" style="transition:opacity 0.5s" class="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-slate-900 text-white text-sm font-semibold px-5 py-3 rounded-2xl shadow-2xl">
+        <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+        {{ session('success') }}
+    </div>
+    <script>setTimeout(() => { const t = document.getElementById('successToast'); if(t) t.style.opacity = '0'; }, 3500);</script>
+    @endif
 
 </x-app-layout>
