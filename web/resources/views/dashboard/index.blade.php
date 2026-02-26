@@ -59,8 +59,8 @@
                     </div>
                 </div>
                 <div>
-                    <p class="text-3xl font-bold text-gray-900">4</p>
-                    <p class="text-xs text-gray-400 mt-1">dans Appart Voltaire</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ $col->User->count() }}</p>
+                    <p class="text-xs text-gray-400 mt-1">{{ $col->name }}</p>
                 </div>
             </div>
 
@@ -230,25 +230,20 @@
                 <div class="bg-slate-900 rounded-2xl p-5 text-white">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-sm font-semibold">Membres de la coloc</h3>
-                        <span class="text-[10px] bg-emerald-500/20 text-emerald-400 font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">4 actifs</span>
+                        <span class="text-[10px] bg-emerald-500/20 text-emerald-400 font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">{{ $col->User->count() }} Colocataires</span>
                     </div>
 
                     <div class="space-y-3">
-                        @foreach([
-                            ['name' => 'Lucas Martin', 'role' => 'Admin', 'color' => 'bg-indigo-500', 'initial' => 'L', 'score' => 180],
-                            ['name' => 'Sara Dupont', 'role' => 'Membre', 'color' => 'bg-purple-500', 'initial' => 'S', 'score' => 155],
-                            ['name' => 'Amine Belkadi', 'role' => 'Membre', 'color' => 'bg-rose-500', 'initial' => 'A', 'score' => 142],
-                            ['name' => 'Jade Moreau', 'role' => 'Membre', 'color' => 'bg-amber-500', 'initial' => 'J', 'score' => 98],
-                        ] as $member)
+                        @foreach($col->User as $member)
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full {{ $member['color'] }} flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                                {{ $member['initial'] }}
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                <img src="" alt="">
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-xs font-semibold text-white truncate">{{ $member['name'] }}</p>
-                                <p class="text-[10px] text-slate-400">{{ $member['role'] }}</p>
+                                <p class="text-xs font-semibold text-white truncate">{{ $member->name }}</p>
+                                <p class="text-[10px] text-slate-400">{{ $member->role }}</p>
                             </div>
-                            <span class="text-[10px] font-bold text-indigo-400">{{ $member['score'] }} pts</span>
+                            <span class="text-[10px] font-bold text-indigo-400">{{ $member->reputation }} pts</span>
                         </div>
                         @endforeach
                     </div>
