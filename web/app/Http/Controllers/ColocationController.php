@@ -97,10 +97,14 @@ class ColocationController extends Controller
             return back()->with('error', 'Impossible d\'annuler la colocation : il reste des dépenses non remboursées.');
         }
 
-        $colocation->User()->updateExistingPivot($colocation->User->pluck('id'), [
+        $userIds = $colocation->User->pluck('id');
+
+        $colocation->User()->updateExistingPivot($userIds, [
             'status' => 'left',
             'left_at' => now(),
         ]);
+
+        User::whereIn('id', $userIds)->increment('reputation');
 
         return redirect()->route('colocations.index')->with('success', 'La colocation a été annulée avec succès.');
     }
@@ -121,7 +125,7 @@ class ColocationController extends Controller
         $this->memberLeaveColocation($colocation, $user->id);
 
         return redirect()->route('colocations.index')
-                         ->with('success', 'Vous avez quitté la colocation. (-1 réputation)');
+                         ->with('success', 'Vous avez quitté la colocation. (Réputation mise à jour)');
     }
 
     private function memberLeaveColocation(Colocation $colocation, int $userId): void
@@ -131,19 +135,29 @@ class ColocationController extends Controller
             'left_at' => now(),
         ]);
 
-        User::find($userId)->decrement('reputation');
-
         $owner = $colocation->User()->wherePivot('role', 'owner')->first();
+        $expenseIds = $colocation->expenses()->pluck('id');
         
-        if ($owner) {
-            $expenseIds = $colocation->expenses()->pluck('id');
-            
-            if ($expenseIds->isNotEmpty()) {
-                \App\Models\Payments::whereIn('expense_id', $expenseIds)
-                    ->where('sender_id', $userId)
-                    ->where('status', 'pending')
-                    ->update(['sender_id' => $owner->id]);
-            }
+        $hasDebt = false;
+
+        if ($expenseIds->isNotEmpty()) {
+            $hasDebt = \App\Models\Payments::whereIn('expense_id', $expenseIds)
+                ->where('sender_id', $userId)
+                ->where('status', 'pending')
+                ->exists();
+        }
+
+        if ($hasDebt) {
+            User::find($userId)->decrement('reputation');
+        } else {
+            User::find($userId)->increment('reputation');
+        }
+        
+        if ($owner && $hasDebt && $expenseIds->isNotEmpty()) {
+            \App\Models\Payments::whereIn('expense_id', $expenseIds)
+                ->where('sender_id', $userId)
+                ->where('status', 'pending')
+                ->update(['sender_id' => $owner->id]);
         }
     }
 
@@ -161,6 +175,6 @@ class ColocationController extends Controller
 
         $this->memberLeaveColocation($colocation, $user->id);
 
-        return back()->with('success', "{$user->name} a été retiré de la colocation.");
+        return back()->with('success', "{$user->name} a été retiré de la colocation. (Réputation mise à jour)");
     }
 }
