@@ -59,8 +59,13 @@
                     </div>
                 </div>
                 <div>
-                    <p class="text-3xl font-bold text-gray-900">{{ $col->User->count() }}</p>
-                    <p class="text-xs text-gray-400 mt-1">{{ $col->name }}</p>
+                    @if($col)
+                        <p class="text-3xl font-bold text-gray-900">{{ $col->User->count() }}</p>
+                        <p class="text-xs text-gray-400 mt-1">{{ $col->name }}</p>
+                    @else
+                        <p class="text-3xl font-bold text-gray-400">—</p>
+                        <p class="text-xs text-gray-400 mt-1">Aucune colocation</p>
+                    @endif
                 </div>
             </div>
 
@@ -227,6 +232,7 @@
             <div class="space-y-4">
 
                 {{-- Membres --}}
+                @if($col)
                 <div class="bg-slate-900 rounded-2xl p-5 text-white">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-sm font-semibold">Membres de la coloc</h3>
@@ -252,6 +258,22 @@
                         Voir la colocation →
                     </a>
                 </div>
+                @else
+                <div class="bg-slate-900 rounded-2xl p-6 text-white flex flex-col items-center text-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-white">Pas encore de colocation</p>
+                        <p class="text-xs text-slate-400 mt-1">Rejoignez une coloc via une invitation ou créez la vôtre.</p>
+                    </div>
+                    <a href="{{ route('colocations.index') }}" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl transition">
+                        Voir mes colocations
+                    </a>
+                </div>
+                @endif
 
             </div>
         </div>
