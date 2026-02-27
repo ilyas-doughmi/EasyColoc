@@ -14,12 +14,23 @@
 
         {{-- Top-right actions --}}
         <div class="flex items-center gap-2 ml-auto">
+            @if($myRole === 'owner')
+            {{-- Owner: cancel colocation --}}
             <button onclick="confirmDelete()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-500 border border-rose-200 hover:bg-rose-50 rounded-lg transition">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                 </svg>
                 Annuler la colocation
             </button>
+            @elseif($myRole === 'member')
+            {{-- Member: leave colocation --}}
+            <button onclick="confirmLeave()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-600 border border-amber-200 hover:bg-amber-50 rounded-lg transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+                Quitter la colocation
+            </button>
+            @endif
             <a href="{{ route('colocations.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 hover:bg-gray-700 text-white text-xs font-semibold rounded-lg transition">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
@@ -252,14 +263,15 @@
             <div class="bg-slate-900 rounded-2xl p-5 text-white">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-semibold">Membres de la coloc</h3>
-                    <span class="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Actifs</span>
                 </div>
 
                 <div class="space-y-3">
 
                     @foreach ($colocation->User as $user)
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">A</div>
+                            <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                <img src="https://ui-avatars.com/api/?name={{$user->name}}&rounded=true&background=123456&color=ffffff" alt="">
+                            </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-xs font-semibold text-white truncate">{{$user->name}}</p>
                                 <p class="text-[10px] flex items-center gap-1">
@@ -267,23 +279,34 @@
                                         <span class="text-amber-400">👑</span>
                                         <span class="text-amber-400 font-semibold uppercase tracking-wide text-[9px]">Owner</span>
                                     @elseif($user->pivot->role == 'member')
-                                        <span class="text-blue-400">👑</span>
                                         <span class="text-blue-400 font-semibold uppercase tracking-wide text-[9px]">Member</span>
                                     @endif
                                 </p>
                             </div>
                             <span class="text-[10px] font-bold text-indigo-400">0 pts</span>
+                            @if($myRole === 'owner' && $user->pivot->role === 'member')
+                            <form method="POST" action="{{ route('colocations.kick', [$colocation->id, $user->id]) }}">
+                                @csrf
+                                <button type="submit" title="Retirer" class="p-1 rounded-lg text-rose-400 hover:bg-rose-500/20 transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </form>
+                            @endif
                         </div>
                     @endforeach
 
                 </div>
 
+                @if($myRole === 'owner')
                 <button onclick="openInviteModal()" class="mt-4 flex items-center justify-center gap-2 w-full py-2.5 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold rounded-xl transition">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
                     </svg>
                     Inviter un membre
                 </button>
+                @endif
             </div>
 
         </div>
@@ -378,6 +401,28 @@
         </div>
     </div>
 
+    {{-- Leave confirmation modal (member only) --}}
+    <div id="leaveModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4">
+            <div class="flex flex-col items-center text-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                </div>
+                <h3 class="text-base font-bold text-gray-900">Quitter la colocation ?</h3>
+                <p class="text-sm text-gray-500">Vous perdrez l'accès à cette colocation. Vous pourrez rejoindre une autre coloc par la suite.</p>
+                <div class="flex gap-3 w-full mt-2">
+                    <button onclick="closeLeaveModal()" class="flex-1 py-2 border border-gray-200 text-sm font-semibold text-gray-700 rounded-xl hover:bg-gray-50 transition">Annuler</button>
+                    <form method="POST" action="{{ route('colocations.leave', $colocation->id) }}" class="flex-1">
+                        @csrf
+                        <button type="submit" class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-xl transition">Oui, quitter</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Month filter
         document.getElementById('monthFilter').addEventListener('change', function () {
@@ -415,6 +460,17 @@
         }
         document.getElementById('inviteModal').addEventListener('click', function (e) {
             if (e.target === this) closeInviteModal();
+        });
+
+        // Leave modal
+        function confirmLeave() {
+            document.getElementById('leaveModal').classList.remove('hidden');
+        }
+        function closeLeaveModal() {
+            document.getElementById('leaveModal').classList.add('hidden');
+        }
+        document.getElementById('leaveModal').addEventListener('click', function (e) {
+            if (e.target === this) closeLeaveModal();
         });
     </script>
 
