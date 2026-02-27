@@ -6,6 +6,7 @@ use App\Http\Requests\ColocationStoreRequest;
 use App\Models\Colocation;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ColocationController extends Controller
 {
@@ -23,17 +24,36 @@ class ColocationController extends Controller
 
     public function show(Colocation $colocation)
     {
+        $myId   = Auth::id();
         $myRole = $colocation->User()
-                             ->wherePivot('user_id', Auth::id())
+                             ->wherePivot('user_id', $myId)
                              ->first()?->pivot->role;
 
-        $colocation->load(['User' => function ($q) {
-            $q->wherePivot('status', 'active');
-        }]);
+        $colocation->load([
+            'User' => function ($query) {
+                $query->wherePivot('status', 'active');
+            },
+            'expenses.paidBy',
+            'expenses.payments.sender',
+            'categories',
+        ]);
+
+        $balances = DB::table('payments')
+            ->join('expenses', 'payments.expense_id', '=', 'expenses.id')
+            ->join('users as sender', 'payments.sender_id', '=', 'sender.id')
+            ->join('users as receiver', 'payments.receiver_id', '=', 'receiver.id')
+            ->where('expenses.colocation_id', $colocation->id)
+            ->where('payments.status', 'pending')
+            ->selectRaw('sender.name as sender_name, receiver.name as receiver_name, SUM(payments.amount) as total')
+            ->groupBy('sender.name', 'receiver.name')
+            ->get();
 
         return view('colocations.show', [
             'colocation' => $colocation,
             'myRole'     => $myRole,
+            'myId'       => $myId,
+            'categories' => $colocation->categories,
+            'balances'   => $balances,
         ]);
     }
 
