@@ -107,6 +107,19 @@ class ColocationController extends Controller
         ]);
 
         User::find($userId)->decrement('reputation');
+
+        $owner = $colocation->User()->wherePivot('role', 'owner')->first();
+        
+        if ($owner) {
+            $expenseIds = $colocation->expenses()->pluck('id');
+            
+            if ($expenseIds->isNotEmpty()) {
+                \App\Models\Payments::whereIn('expense_id', $expenseIds)
+                    ->where('sender_id', $userId)
+                    ->where('status', 'pending')
+                    ->update(['sender_id' => $owner->id]);
+            }
+        }
     }
 
     public function kick(Colocation $colocation, User $user)
