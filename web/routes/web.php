@@ -11,7 +11,10 @@ Route::get('/', function () {
 });
 
 
+
 Route::middleware('auth')->group(function () {
+    Route::get('/invitation', [InvitationController::class, 'accept'])->name('invitations.accept');
+
     Route::get('/dashboard',[DashboardController::class,'index'])->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -22,6 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/colocations/{colocation}', [ColocationController::class, 'show'])->name('colocations.show');
     Route::post('/colocations', [ColocationController::class, 'store'])->name('colocations.store');
     Route::post('/invitations', [InvitationController::class, 'sendInvitation'])->name('invitations.send');
+    Route::post('/invitations/join', [InvitationController::class, 'join'])->name('invitations.join');
 });
 
 require __DIR__.'/auth.php';
