@@ -89,6 +89,20 @@ class InvitationController extends Controller
                          ->with('success', 'Bienvenue dans la colocation ! 🎉');
    }
 
+   public function decline(Request $request)
+   {
+        $token = $request->input('token');
+
+        $invitation = Invitation::where('token', $token)->first();
+
+        if ($invitation && $invitation->is_active) {
+            $invitation->update(['is_active' => false]);
+            return redirect()->route('dashboard')->with('success', 'Invitation refusée.');
+        }
+
+        return redirect()->route('dashboard');
+   }
+
    public function sendInvitation(Request $request)
    {
         $request->validate([
