@@ -50,14 +50,24 @@
 
                 {{-- CTA --}}
                 @auth
-                    <form method="POST" action="{{ route('invitations.join') }}" class="w-full">
-                        @csrf
-                        <input type="hidden" name="token" value="{{ $invitation->token }}">
-                        <button type="submit"
-                            class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-md shadow-indigo-200 transition">
-                            ✅ Rejoindre la colocation
-                        </button>
-                    </form>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full">
+                        <form method="POST" action="{{ route('invitations.join') }}" class="flex-1">
+                            @csrf
+                            <input type="hidden" name="token" value="{{ $invitation->token }}">
+                            <button type="submit"
+                                class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-md shadow-indigo-200 transition">
+                                ✅ Rejoindre la colocation
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ route('invitations.decline') }}" class="flex-1">
+                            @csrf
+                            <input type="hidden" name="token" value="{{ $invitation->token }}">
+                            <button type="submit"
+                                class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-xl transition">
+                                ❌ Refuser
+                            </button>
+                        </form>
+                    </div>
                 @else
                     <div class="w-full space-y-3">
                         <p class="text-xs text-gray-500">Connectez-vous pour accepter l'invitation.</p>
