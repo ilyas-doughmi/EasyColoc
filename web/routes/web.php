@@ -26,6 +26,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/colocations/{colocation}/leave', [ColocationController::class, 'leave'])->name('colocations.leave');
     Route::post('/colocations/{colocation}/cancel', [ColocationController::class, 'cancel'])->name('colocations.cancel');
     Route::post('/colocations/{colocation}/kick/{user}', [ColocationController::class, 'kick'])->name('colocations.kick');
+    
+    Route::post('/colocations/{colocation}/expenses', [\App\Http\Controllers\ExpenseController::class, 'store'])->name('expenses.store');
+    Route::post('/colocations/{colocation}/payments/{payment}/paid', [\App\Http\Controllers\ExpenseController::class, 'markAsPaid'])->name('payments.paid');
     Route::post('/colocations', [ColocationController::class, 'store'])->name('colocations.store');
     Route::post('/invitations', [InvitationController::class, 'sendInvitation'])->name('invitations.send');
     Route::post('/invitations/join', [InvitationController::class, 'join'])->name('invitations.join');
