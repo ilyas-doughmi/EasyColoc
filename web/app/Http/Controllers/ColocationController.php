@@ -27,6 +27,10 @@ class ColocationController extends Controller
                              ->wherePivot('user_id', Auth::id())
                              ->first()?->pivot->role;
 
+        $colocation->load(['User' => function ($q) {
+            $q->wherePivot('status', 'active');
+        }]);
+
         return view('colocations.show', [
             'colocation' => $colocation,
             'myRole'     => $myRole,
@@ -83,5 +87,22 @@ class ColocationController extends Controller
         ]);
 
         User::find($userId)->decrement('reputation');
+    }
+
+    public function kick(Colocation $colocation, User $user)
+    {
+        $requester = Auth::user();
+        $myPivot = $colocation->User()->wherePivot('user_id', $requester->id)->first()?->pivot;
+        if (!$myPivot || $myPivot->role !== 'owner') {
+            abort(403);
+        }
+        $targetPivot = $colocation->User()->wherePivot('user_id', $user->id)->first()?->pivot;
+        if (!$targetPivot || $targetPivot->role !== 'member') {
+            return back()->with('error', 'Impossible de retirer cet utilisateur.');
+        }
+
+        $this->memberLeaveColocation($colocation, $user->id);
+
+        return back()->with('success', "{$user->name} a été retiré de la colocation.");
     }
 }
