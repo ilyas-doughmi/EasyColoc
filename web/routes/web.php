@@ -26,6 +26,7 @@ Route::middleware(['auth', \App\Http\Middleware\CheckBanned::class])->group(func
 
     Route::get('/colocations', [ColocationController::class, 'index'])->name('colocations.index');
     Route::get('/colocations/create', [ColocationController::class, 'create'])->name('colocations.create');
+    Route::post('/colocations', [ColocationController::class, 'store'])->name('colocations.store');
     Route::middleware([\App\Http\Middleware\CheckColocationMembership::class])->group(function () {
         Route::get('/colocations/{colocation}', [ColocationController::class, 'show'])->name('colocations.show');
         Route::post('/colocations/{colocation}/leave', [ColocationController::class, 'leave'])->name('colocations.leave');
@@ -33,9 +34,8 @@ Route::middleware(['auth', \App\Http\Middleware\CheckBanned::class])->group(func
         Route::post('/colocations/{colocation}/kick/{user}', [ColocationController::class, 'kick'])->name('colocations.kick');
         Route::post('/colocations/{colocation}/categories', [CategoryController::class, 'store'])->name('categories.store');
         Route::delete('/colocations/{colocation}/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+        Route::post('/colocations/{colocation}/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
     });
-    Route::post('/colocations', [ColocationController::class, 'store'])->name('colocations.store');
-    Route::post('/colocations/{colocation}/expenses', [ExpenseController::class, 'store'])->name('expenses.store')->middleware([\App\Http\Middleware\CheckColocationMembership::class]);
     Route::post('/payments/{payment}/pay', [PaymentController::class, 'pay'])->name('payments.pay');
     Route::post('/invitations', [InvitationController::class, 'sendInvitation'])->name('invitations.send');
     Route::post('/invitations/join', [InvitationController::class, 'join'])->name('invitations.join');
