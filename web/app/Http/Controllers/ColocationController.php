@@ -80,6 +80,31 @@ class ColocationController extends Controller
         return redirect()->route('colocations.index');
     }
 
+    public function cancel(Colocation $colocation)
+    {
+        $user = Auth::user();
+        $pivot = $colocation->User()->wherePivot('user_id', $user->id)->first()?->pivot;
+
+        if (!$pivot || $pivot->role !== 'owner') {
+            return back()->with('error', 'Seul le propriétaire peut annuler la colocation.');
+        }
+
+        $hasPendingPayments = \App\Models\Payments::whereIn('expense_id', $colocation->expenses()->pluck('id'))
+                                                ->where('status', 'pending')
+                                                ->exists();
+
+        if ($hasPendingPayments) {
+            return back()->with('error', 'Impossible d\'annuler la colocation : il reste des dépenses non remboursées.');
+        }
+
+        $colocation->User()->updateExistingPivot($colocation->User->pluck('id'), [
+            'status' => 'left',
+            'left_at' => now(),
+        ]);
+
+        return redirect()->route('colocations.index')->with('success', 'La colocation a été annulée avec succès.');
+    }
+
     public function leave(Colocation $colocation)
     {
         $user = Auth::user();
