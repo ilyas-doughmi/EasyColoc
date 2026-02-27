@@ -21,9 +21,10 @@
 
         @forelse($colocations as $coloc)
 
-        <div class="bg-white rounded-2xl border {{ $coloc->status === 'cancelled' ? 'border-dashed border-gray-200 opacity-60' : 'border-gray-100 hover:shadow-md' }} shadow-sm overflow-hidden transition flex flex-col">
+        @php $inactive = $coloc->status !== 'active' || $coloc->pivot->status === 'left'; @endphp
+        <div class="bg-white rounded-2xl border {{ $inactive ? 'border-dashed border-gray-200 opacity-60' : 'border-gray-100 hover:shadow-md' }} shadow-sm overflow-hidden transition flex flex-col">
 
-            <div class="h-1.5 {{ $coloc->status === 'cancelled' ? 'bg-gray-200' : 'bg-gradient-to-r from-indigo-500 to-purple-600' }}"></div>
+            <div class="h-1.5 {{ $inactive ? 'bg-gray-200' : 'bg-gradient-to-r from-indigo-500 to-purple-600' }}"></div>
 
             <div class="p-5 flex flex-col flex-1">
 
@@ -32,8 +33,8 @@
 
                     {{-- Icon + crown --}}
                     <div class="relative flex-shrink-0">
-                        <div class="w-10 h-10 rounded-xl {{ $coloc->status === 'cancelled' ? 'bg-gray-100' : 'bg-indigo-100' }} flex items-center justify-center">
-                            <svg class="w-5 h-5 {{ $coloc->status === 'cancelled' ? 'text-gray-400' : 'text-indigo-600' }}" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <div class="w-10 h-10 rounded-xl {{ $inactive ? 'bg-gray-100' : 'bg-indigo-100' }} flex items-center justify-center">
+                            <svg class="w-5 h-5 {{ $inactive ? 'text-gray-400' : 'text-indigo-600' }}" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                             </svg>
                         </div>
@@ -59,13 +60,17 @@
                     </div>
 
                     {{-- Status badge --}}
-                    @if($coloc->status === 'active')
-                    <span class="flex-shrink-0 inline-flex items-center gap-1 text-[10px] bg-emerald-100 text-emerald-700 font-semibold px-2 py-1 rounded-full uppercase tracking-wide">
-                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>Active
+                    @if($coloc->pivot->status === 'left')
+                    <span class="flex-shrink-0 inline-flex items-center gap-1 text-[10px] bg-gray-100 text-gray-500 font-semibold px-2 py-1 rounded-full uppercase tracking-wide">
+                        <span class="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>Quitté
                     </span>
-                    @else
+                    @elseif($coloc->status === 'cancelled')
                     <span class="flex-shrink-0 inline-flex items-center gap-1 text-[10px] bg-red-100 text-red-500 font-semibold px-2 py-1 rounded-full uppercase tracking-wide">
                         <span class="w-1.5 h-1.5 bg-red-400 rounded-full"></span>Annulée
+                    </span>
+                    @else
+                    <span class="flex-shrink-0 inline-flex items-center gap-1 text-[10px] bg-emerald-100 text-emerald-700 font-semibold px-2 py-1 rounded-full uppercase tracking-wide">
+                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>Active
                     </span>
                     @endif
                 </div>
@@ -84,7 +89,7 @@
 
                 {{-- Footer --}}
                 <div class="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
-                    @if($coloc->status !== 'cancelled')
+                    @if(!$inactive)
                     <a href="{{ route('colocations.show', $coloc) }}" class="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-white hover:bg-indigo-600 px-3 py-1.5 rounded-lg transition">
                         Ouvrir
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
