@@ -19,6 +19,76 @@ class InvitationController extends Controller
         return $token;
    }
 
+   public function accept()
+   {
+        $token = request('token');
+
+        $invitation = Invitation::where('token', $token)
+                                ->where('is_active', true)
+                                ->with('colocations')
+                                ->first();
+
+        if (!$invitation) {
+            abort(404, 'Invitation invalide ou déjà utilisée.');
+        }
+
+        if (Auth::check() && Auth::user()->email !== $invitation->email) {
+            abort(403, 'Cette invitation ne vous est pas destinée.');
+        }
+
+        return view('invitations.accept', ['invitation' => $invitation]);
+   }
+
+   public function join(Request $request)
+   {
+        $token = $request->input('token');
+
+        $invitation = Invitation::where('token', $token)->first();
+
+        if (!$invitation || !$invitation->is_active) {
+            return redirect()->back()->with('error', 'Invitation invalide ou déjà utilisée.');
+        }
+
+        $user = Auth::user();
+
+        if ($user->email !== $invitation->email) {
+            return redirect()->back()->with('error', 'Cette invitation ne vous est pas destinée.');
+        }
+
+        $colocation = \App\Models\Colocation::find($invitation->colocation_id);
+
+        if (!$colocation) {
+            return redirect()->back()->with('error', 'La colocation associée n\'existe plus.');
+        }
+
+        $alreadyMember = $colocation->User()->where('user_id', $user->id)->exists();
+
+        if ($alreadyMember) {
+            return redirect()->route('colocations.show', $colocation->id)
+                             ->with('error', 'Vous êtes déjà membre de cette colocation.');
+        }
+
+        $hasActiveColoc = $user->colocations()
+                               ->wherePivot('status', 'active')
+                               ->exists();
+
+        if ($hasActiveColoc) {
+            return redirect()->back()
+                             ->with('error', 'Vous appartenez déjà à une colocation active. Quittez-la avant d\'en rejoindre une nouvelle.');
+        }
+
+        $colocation->User()->attach($user->id, [
+            'role'      => 'member',
+            'status'    => 'active',
+            'joined_at' => now(),
+        ]);
+
+        $invitation->update(['is_active' => false]);
+
+        return redirect()->route('colocations.show', $colocation->id)
+                         ->with('success', 'Bienvenue dans la colocation ! 🎉');
+   }
+
    public function sendInvitation(Request $request)
    {
         $request->validate([
@@ -39,6 +109,15 @@ class InvitationController extends Controller
         }
 
         $token = $this->codeGenerator();
+
+        $exists = Invitation::where('email', $request->email)
+                            ->where('colocation_id', $activeColocation->id)
+                            ->where('is_active', true)
+                            ->exists();
+
+        if ($exists) {
+            return redirect()->back()->with('error', 'Une invitation active existe déjà pour cet email.');
+        }
 
         $invitation = Invitation::create([
             'email' => $request->email,
